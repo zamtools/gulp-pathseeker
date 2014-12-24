@@ -11,17 +11,18 @@ module.exports = (group, opts) ->
                 oncomment: (value) ->
                     if not seeking
                         matchStart = value.match /pathseeker\:(\w+)/
-                        console.log 'matchstart', matchStart
                         # only seek if group matches block name
                         seeking = matchStart isnt null and matchStart.length is 2 and matchStart[1] is group
                     else if seeking
                         matchEnd = value.match /endpathseeker/
-                        console.log 'matchend', matchEnd
                         seeking = matchEnd is null
-                    console.log 'seeking', seeking
                 onattribute: (name, value) ->
                     if seeking and name in ['src', 'href']
-                        console.log name, value
+                        # ignore absolute urls
+                        if not value.match /^https?\:\/\//
+                            urls.push value
+                onend: ->
+                    console.log urls
 
             parser.write file.contents.toString 'utf8'
             parser.end()
