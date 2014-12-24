@@ -1,7 +1,28 @@
-gutil   = require 'gulp-util'
-through = require 'through2'
+gutil      = require 'gulp-util'
+through    = require 'through2'
+htmlparser = require 'htmlparser2'
 
 module.exports = (opts) ->
-    console.log 'ding'
     through.obj (file, enc, cb) ->
-        console.log 'through', file
+        if file.isBuffer()
+            urls = []
+            seeking = false
+            parser = new htmlparser.Parser 
+                oncomment: (value) ->
+                    if not seeking
+                        matchStart = value.match /pathseeker\:(\w+)/
+                        console.log 'matchstart', matchStart
+                        seeking = matchStart isnt null and matchStart.length is 2
+                    else if seeking
+                        matchEnd = value.match /endpathseeker/
+                        console.log 'matchend', matchEnd
+                        seeking = matchEnd is null
+                    console.log 'seeking', seeking
+                onattribute: (name, value) ->
+                    if seeking and name in ['src', 'href']
+                        console.log name, value
+
+            parser.write file.contents.toString 'utf8'
+            parser.end()
+        @push file
+        cb()
