@@ -1,5 +1,6 @@
 gutil      = require 'gulp-util'
 through    = require 'through2'
+path       = require 'path'
 htmlparser = require 'htmlparser2'
 
 module.exports = (group, opts) ->
@@ -20,7 +21,7 @@ module.exports = (group, opts) ->
                     if seeking and name in ['src', 'href']
                         # ignore absolute urls
                         if not value.match /^https?\:\/\//
-                            urls.push value
+                            urls.push path.normalize path.join file.path, value
                 onend: ->
                     console.log urls
 
