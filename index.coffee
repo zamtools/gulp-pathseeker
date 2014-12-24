@@ -12,6 +12,7 @@ module.exports = (group, opts) ->
                     if not seeking
                         matchStart = value.match /pathseeker\:(\w+)/
                         console.log 'matchstart', matchStart
+                        # only seek if group matches block name
                         seeking = matchStart isnt null and matchStart.length is 2 and matchStart[1] is group
                     else if seeking
                         matchEnd = value.match /endpathseeker/
