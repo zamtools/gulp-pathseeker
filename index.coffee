@@ -6,7 +6,7 @@ htmlparser = require 'htmlparser2'
 module.exports = (group, opts) ->
     through.obj (file, enc, cb) ->
         if file.isBuffer()
-            urls = []
+            # urls = []
             seeking = false
             parser = new htmlparser.Parser 
                 oncomment: (value) ->
@@ -17,15 +17,17 @@ module.exports = (group, opts) ->
                     else if seeking
                         matchEnd = value.match /endpathseeker/
                         seeking = matchEnd is null
-                onattribute: (name, value) ->
+                onattribute: (name, value) =>
                     if seeking and name in ['src', 'href']
                         # ignore absolute urls
-                        if not value.match /^https?\:\/\//
-                            urls.push path.normalize path.join file.path, value
-                onend: ->
-                    console.log urls
+                        if not value.match /^https?\:\/\//i
+                            # urls.push path.normalize path.join file.path, value
+                            @push new gutil.File
+                                cwd: file.path
+                                path: path.normalize path.join file.path, value
+                # onend: ->
+                #     console.log urls
 
             parser.write file.contents.toString 'utf8'
             parser.end()
-        @push file
         cb()
